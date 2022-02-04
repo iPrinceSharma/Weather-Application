@@ -1,0 +1,223 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="jumbotron">
+    <div class="row">
+        <div class="col-md-7">
+            <h1 class="display-4 hidden-xs-down">What's the weather?</h1>
+            <p class="lead">Enter the name of a city to check its weather.</p>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-8">
+                        <form method="get">
+                            <div class="form-group">
+                                <label for="city"></label>
+                                <input type="text" class="form-control" name="city" id="city" placeholder="Porto, Madera, Lisbon" value="">
+                            </div>
+                            <button class="btn btn-success deleteBtn" type="button" id="save" onclick="findWeatherDetails()">Update</button>
+                        </form>
+                    </div>
+                </div> <!-- End messsage -->
+            </div> <!-- End col-->
+        </div>
+        <div class="col-md-5" id="weatherDetailSection" style="display:none">
+            <section class="container">
+                <div class="row">
+                    <div class="col-md-7">
+                        <h2 id="ciytName">
+                            Lisbon, Portugal
+                        </h2>
+                        <h4 id="datetime">Thursday, 6:00 pm</h4>
+                        <h4 id="description">Mostly cloudy</h4>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-md-6" style="
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 15px;
+">
+                                <div class="icon">
+                                    <div class="icon-box">
+                                        <div id="weather-icon" class="col-lg-12 col-md-8 col-sm-12">
+                                            <img src="https://assets.weatherstack.com/images/wsymbols01_png_64/wsymbol_0004_black_low_cloud.png"
+                                                style="border-radius:10px;height:100px" id="weatherImage"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" style="margin-top:20px;padding-left:0px">
+                                <div id="weather-icon" class="col-lg-12 col-md-8 col-sm-12">
+                                    <h2 id="temperature"></h2>  
+                                    
+                                </div>
+                            </div>
+    
+                        </div>
+                    </div>                       
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                     
+                        <h3 id="humidity">73%</h3>
+                        <h3 id="wind">Wind: 19km/hr</h3>
+                    
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div> 	<!-- End row -->
+
+<script>
+
+    function makeSectionVisible() {
+
+
+        // update  the fields here
+        var city = document.getElementById("ciytName");
+        var datetime = document.getElementById("datetime");
+        var description = document.getElementById("description");
+        var weatherImage = document.getElementById("weatherImage");
+        var temperature = document.getElementById("temperature");
+
+        temperature.innerHTML = "7" + '&#8451';
+        //  now make the section visible
+        var id = document.getElementById("weatherDetailSection");
+        id.style.display = "block";
+
+
+    }
+
+    function findWeatherDetails() {
+        var address = document.getElementById("city").value;
+
+        if (address != "") {
+            makeSectionVisible();
+            var requestUrl = 'http://api.weatherstack.com/current?access_key=342c6ba75904a99d33d65cc207f082cc&query=' + address.trim();
+            console.log(requestUrl);
+            
+
+            
+           @* $.ajax({
+                url: 'http://api.weatherstack.com/current',
+                headers: {
+
+                },
+                data: {
+                    access_key: '342c6ba75904a99d33d65cc207f082cc',
+                    query: address
+                },
+                dataType: 'json',
+                success: function (apiResponse) {
+                    console.log(`Current temperature in ${apiResponse.location.name} is ${apiResponse.current.temperature}℃`);
+                }
+            })*@
+
+            $.ajax({
+                url: 'http://api.openweathermap.org/data/2.5/weather',
+                headers: {
+
+                },
+                data: {
+                    appid: '5d20f3f8dd4a9957af6c4982fdc52eb4',
+                    q: address
+                },
+                dataType: 'json',
+                success: function (apiResponse) {
+                    //console.log(`Current temperature in ${apiResponse.location.name} is ${apiResponse.current.temperature}℃`);
+
+                    // update  the fields here
+                    var city = document.getElementById("ciytName");
+                    var datetime = document.getElementById("datetime");
+                    var description = document.getElementById("description");
+                    var weatherImage = document.getElementById("weatherImage");
+                    var temperature = document.getElementById("temperature");
+                    var humidity = document.getElementById("humidity");
+                    var wind = document.getElementById("wind");
+
+                    temperature.innerHTML = "7";
+
+                    var myCustomCityName = apiResponse.name + ", " + apiResponse.sys.country;
+                    city.innerHTML = myCustomCityName;
+
+                    var date = new Date(apiResponse.dt * 1000);
+
+                    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                    var imagesPath = [
+                        "/Content/Images/Fog.png",
+                        "/Content/Images/OvercastClouds.png",
+                        "/Content/Images/Thunderstorm.png",
+                        "/Content/Images/BrokenClouds.png",
+                        "/Content/Images/ClearSun.jpg"
+                    ];
+                    var imageTYpe = apiResponse.weather[0].main;
+
+
+                    if (imageTYpe == 'Clouds') {
+                        weatherImage.src = imagesPath[3];
+                    } else if (imageTYpe == 'Fog') {
+                        weatherImage.src = imagesPath[0];
+                    } else if (imageTYpe == '') {
+                        weatherImage.src = imagesPath[4];
+                    }
+
+                    var currentDay = date.getDay();
+                    // Hours part from the timestamp
+                    var hours = date.getHours();
+                    // Minutes part from the timestamp
+                    var minutes = "0" + date.getMinutes();
+                    // Seconds part from the timestamp
+                    var seconds = "0" + date.getSeconds();
+
+                    var meridian;
+
+                    if (hours < 12) {
+                        meridian = " am"
+                    } else if (hours > 12) {
+                        hours = 23 - hours;
+                        meridian = " pm";
+                    } else if (hours == 2) {
+                        meridian = " pm";
+                    }
+
+                    // Will display time in 10:30:23 format
+                    var formattedTime = days[currentDay] + "," + hours + ':' + minutes.substr(-2) + meridian;
+
+                    datetime.innerHTML = formattedTime;
+                    description.innerHTML = apiResponse.weather[0].description;
+                    temperature.innerHTML = (apiResponse.main.temp - 273.15).toFixed(1) +  '&#8451';;
+
+                    humidity.innerHTML = "Humidity:"+apiResponse.main.humidity+"%";
+                    wind.innerHTML = "Wind:"+apiResponse.wind.speed+"km/hr";
+
+
+                    //  now make the section visible
+                    var id = document.getElementById("weatherDetailSection");
+                    id.style.display = "block";
+                   @* $.ajax({
+                        type: "POST",
+                        url: myRequest,
+                        dataType: 'json',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(myRequest)
+                    }).done((data) => {
+                        alert("I Got it");
+                    });*@
+
+                }
+            });
+        } else {
+            alert("Please select country name first");
+        }
+    }
+
+
+
+</script>
+                  
